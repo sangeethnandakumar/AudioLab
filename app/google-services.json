@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "45020322697",
+    "firebase_url": "https://audiolab-b375d.firebaseio.com",
+    "project_id": "audiolab-b375d",
+    "storage_bucket": "audiolab-b375d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:45020322697:android:5ce5f42206a2ba29",
+        "android_client_info": {
+          "package_name": "amazinginsidestudios.audiolab"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "45020322697-n0em6dq69p0nkhnci5k6bc857tv4lbf9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "amazinginsidestudios.audiolab",
+            "certificate_hash": "7e8bf7a684424bc46ee6eaabd246d27b0867680a"
+          }
+        },
+        {
+          "client_id": "45020322697-8ouv2bk0d2s57bso6hl78hoenh6pn4rc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZ3ycz_vMqBZVOYBMsc35KTJ2JjVbNpFQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "45020322697-8ouv2bk0d2s57bso6hl78hoenh6pn4rc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
