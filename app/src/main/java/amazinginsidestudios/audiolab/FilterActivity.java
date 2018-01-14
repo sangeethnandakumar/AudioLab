@@ -3,6 +3,7 @@ package amazinginsidestudios.audiolab;
 import android.content.Intent;
 import android.media.Image;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -10,7 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;
@@ -33,20 +33,19 @@ public class FilterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
-        filterList=findViewById(R.id.filter_list);
-        filterImage=findViewById(R.id.filter_image);
-        filterName=findViewById(R.id.filter_name);
-        topsheet=findViewById(R.id.topsheet);
+        filterList = findViewById(R.id.filter_list);
+        filterImage = findViewById(R.id.filter_image);
+        filterName = findViewById(R.id.filter_name);
+        topsheet = findViewById(R.id.topsheet);
 
-        Intent i= getIntent();
+        Intent i = getIntent();
         Bundle b = i.getExtras();
-        String type =b.getString("type");
-        String name =b.getString("name");
-        String image =b.getString("image");
+        String type = b.getString("type");
+        String name = b.getString("name");
+        String image = b.getString("image");
         filterName.setText(name);
 
-        switch (type)
-        {
+        switch (type) {
             case "Movie":
                 queryMovie(name);
                 fetchMovieImage(image);
@@ -57,6 +56,9 @@ public class FilterActivity extends AppCompatActivity {
                 fetchActorImage(image);
                 break;
         }
+
+
+
     }
 
     public void queryMovie(String query)

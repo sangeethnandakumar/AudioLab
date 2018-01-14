@@ -1,14 +1,19 @@
 package amazinginsidestudios.audiolab;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
+import android.provider.Settings.Secure;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -23,6 +28,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;
@@ -126,6 +133,52 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+
+    private void registerUser(FirebaseUser user)
+    {
+        String hardware = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        String email=user.getEmail();
+        email=email.replace("@","_").replace(".","_");
+        database.getReference(email+"/Name").setValue(user.getDisplayName());
+        database.getReference(email+"/Photo").setValue(user.getPhotoUrl().toString());
+        database.getReference(email+"/"+hardware+"/Brand").setValue(Build.BRAND);
+        database.getReference(email+"/"+hardware+"/Model").setValue(Build.MODEL);
+        database.getReference(email+"/"+hardware+"/Manufacturer").setValue(Build.MANUFACTURER);
+
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        activityManager.getMemoryInfo(mi);
+        double availableMegs = mi.availMem / 0x100000L;
+        double totalMegs = mi.totalMem / 0x100000L;
+        double percentAvail = mi.availMem / (double)mi.totalMem * 100.0;
+
+        database.getReference(email+"/"+hardware+"/TotalRAM").setValue(String.valueOf(availableMegs+"MB"));
+        database.getReference(email+"/"+hardware+"/AvailRAM").setValue(String.valueOf(totalMegs+"MB"));
+        database.getReference(email+"/"+hardware+"/CompRAM").setValue(String.valueOf(percentAvail).substring(0,3)+"Per");
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+
+        database.getReference(email+"/"+hardware+"/ScreenWidth").setValue(String.valueOf(width));
+        database.getReference(email+"/"+hardware+"/ScreenHeight").setValue(String.valueOf(height));
+
+        double wi=(double)width/(double)displayMetrics.xdpi;
+        double hi=(double)height/(double)displayMetrics.ydpi;
+        double x = Math.pow(wi,2);
+        double y = Math.pow(hi,2);
+        double screenInches = Math.sqrt(x+y);
+
+        database.getReference(email+"/"+hardware+"/ScreenInches").setValue(String.valueOf(screenInches).substring(0,4)+"in");
+    }
+
+
+
+
+
     public void query(String query)
     {
         WebServer server=new WebServer(getApplicationContext());
@@ -151,17 +204,17 @@ public class MainActivity extends AppCompatActivity {
     {
         Type listType = new TypeToken<ArrayList<Packet>>(){}.getType();
         List<Packet> packetList = new Gson().fromJson(json, listType);
-        render(packetList);
-    }
-
-    public void render(List<Packet> packetList)
-    {
         if (packetList==null)
         {
             packetList=new ArrayList<>();
         }
+        render(packetList);
+    }
+
+    public void render(final List<Packet> packetList)
+    {
         PacketAdapter adapter=new PacketAdapter(MainActivity.this,getApplicationContext(),packetList);
-        ListView searchList=(ListView)findViewById(R.id.search_list);
+        ListView searchList=findViewById(R.id.search_list);
         searchList.setAdapter(adapter);
     }
 
@@ -178,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
             signin.setVisibility(View.INVISIBLE);
             mUsername = mFirebaseUser.getDisplayName();
             openConnector(mFirebaseUser);
+            registerUser(mFirebaseUser);
         }
     }
 
@@ -204,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 signin.setVisibility(View.GONE);
                 openConnector(user);
+                registerUser(user);
             }
             else
             {
