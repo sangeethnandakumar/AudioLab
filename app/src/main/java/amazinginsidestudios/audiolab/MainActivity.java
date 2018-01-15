@@ -2,6 +2,7 @@ package amazinginsidestudios.audiolab;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -14,6 +15,8 @@ import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
 import android.provider.Settings.Secure;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -28,10 +31,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.squareup.picasso.Picasso;
 
 import java.lang.reflect.Type;
@@ -54,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
     Button login;
     TextView username,logout;
     ImageView profile;
-    AppSettings settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -64,13 +66,14 @@ public class MainActivity extends AppCompatActivity {
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        final MaterialSearchBar searchBar = (MaterialSearchBar) findViewById(R.id.searchBar);
+
+
         signin= findViewById(R.id.signin);
         login= findViewById(R.id.login);
         logout= findViewById(R.id.signout);
         username=findViewById(R.id.username);
         profile=findViewById(R.id.profile);
-        settings=new AppSettings(getApplicationContext());
-        settings.saveSettings("isAuthenticated","false");
 
         checkAuth();
 
@@ -107,28 +110,34 @@ public class MainActivity extends AppCompatActivity {
         });
         permit.askPermitsFor(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE);
 
-        final EditText search=(EditText)findViewById(R.id.query);
-
-        search.setOnClickListener(new View.OnClickListener() {
+        searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
-            public void onClick(View view) {
-                search.setText("");
-                query("");
+            public void onSearchStateChanged(boolean enabled) {
+
             }
-        });
 
-        search.setOnKeyListener(new View.OnKeyListener()
-        {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (i == KeyEvent.KEYCODE_ENTER))
+            public void onSearchConfirmed(CharSequence text) {
+                query(searchBar.getText().toString());
+                if (!searchBar.isFocused())
                 {
-                    query(search.getText().toString());
-                    return true;
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
                 }
-                return false;
+            }
+
+            @Override
+            public void onButtonClicked(int buttonCode)
+            {
+                switch (buttonCode)
+                {
+                    case MaterialSearchBar.BUTTON_NAVIGATION:
+                        query("");
+                        break;
+                }
             }
         });
+
 
 
     }
@@ -174,10 +183,6 @@ public class MainActivity extends AppCompatActivity {
 
         database.getReference(email+"/"+hardware+"/ScreenInches").setValue(String.valueOf(screenInches).substring(0,4)+"in");
     }
-
-
-
-
 
     public void query(String query)
     {
@@ -269,7 +274,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void openConnector(FirebaseUser user)
     {
-        settings.saveSettings("isAuthenticated","true");
         username.setText(user.getDisplayName());
         if (user.getPhotoUrl() != null)
         {

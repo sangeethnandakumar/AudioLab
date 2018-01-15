@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="wrap_content"
+        android:layout_width="89dp"
         android:layout_height="25dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
@@ -22,40 +22,7 @@
         android:textSize="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/query" />
-
-    <EditText
-        android:id="@+id/query"
-        android:layout_width="352dp"
-        android:layout_height="43dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/search_box_bg"
-        android:ems="10"
-        android:fontFamily="@font/search_text"
-        android:inputType="textPersonName"
-        android:paddingLeft="10dp"
-        android:paddingRight="40dp"
-        android:paddingTop="6dp"
-        android:singleLine="true"
-        android:textAlignment="viewStart"
-        android:textColor="#ffff"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/query"
-        app:layout_constraintEnd_toEndOf="@+id/query"
-        app:layout_constraintTop_toTopOf="@+id/query"
-        app:srcCompat="@drawable/search" />
+        app:layout_constraintTop_toBottomOf="@+id/searchBar" />
 
     <ListView
         android:id="@+id/search_list"
@@ -77,7 +44,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="#c4000000"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -191,5 +158,21 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
+
+    <com.mancj.materialsearchbar.MaterialSearchBar
+        android:id="@+id/searchBar"
+        style="@style/MaterialSearchBarLight"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:mt_hint="Search Audios"
+        app:title="AudioLAB"
+        app:mt_navIconEnabled="true"
+        app:mt_borderlessRippleEnabled="true" />
 
 </android.support.constraint.ConstraintLayout>
