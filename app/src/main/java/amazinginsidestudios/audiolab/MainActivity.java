@@ -3,6 +3,7 @@ package amazinginsidestudios.audiolab;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -40,6 +41,7 @@ import com.google.gson.reflect.TypeToken;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,11 +64,19 @@ public class MainActivity extends AppCompatActivity {
     TextView username,logout;
     ImageView profile;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ContextWrapper c = new ContextWrapper(this);
+        String DATA_DIR=c.getFilesDir().getPath();
+
+        //Create Directory if not exits
+        String dirPath = DATA_DIR + "/" + "cache";
+        File projDir = new File(dirPath);
+        if (!projDir.exists()) projDir.mkdirs();
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 

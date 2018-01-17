@@ -3,11 +3,11 @@ package amazinginsidestudios.audiolab;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Environment;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
 import android.view.MenuItem;
@@ -43,6 +43,8 @@ public class PacketAdapter extends BaseAdapter {
     List<Packet> packetList;
     MediaPlayer mp;
     DownloadMode mode;
+    ContextWrapper c;
+    String CACHE_DIR;
 
 
     public PacketAdapter(Activity activity, Context context, List<Packet> packetList)
@@ -50,6 +52,8 @@ public class PacketAdapter extends BaseAdapter {
         this.activity = activity;
         this.context = context;
         this.packetList = packetList;
+        c = new ContextWrapper(activity);
+        CACHE_DIR=c.getFilesDir().getPath()+"/cache/";
     }
 
     @Override
@@ -419,7 +423,7 @@ public class PacketAdapter extends BaseAdapter {
 
     private boolean isAudioCatched(String Slno)
     {
-        File file = new File("/storage/emulated/0" + File.separator + Slno+".mp3");
+        File file = new File(CACHE_DIR+ Slno+".mp3");
         if(file.exists()) {
             return true;
         }
@@ -430,14 +434,14 @@ public class PacketAdapter extends BaseAdapter {
 
     private void clearCatches()
     {
-        String path = Environment.getExternalStorageDirectory().toString()+"/Pictures";
-        Log.d("Files", "Path: " + path);
+        String path = CACHE_DIR;
+        Log.i("Files", "Path: " + path);
         File directory = new File(path);
         File[] files = directory.listFiles();
-        Log.d("Files", "Size: "+ files.length);
+        Log.i("Files", "Size: "+ files.length);
         for (int i = 0; i < files.length; i++)
         {
-            Log.d("Files", "FileName:" + files[i].getName());
+            Log.i("Files", "FileName:" + files[i].getName());
         }
     }
 
@@ -452,6 +456,8 @@ public class PacketAdapter extends BaseAdapter {
             public void onStarted()
             {
                 progressBar.setVisibility(View.VISIBLE);
+                String path=CACHE_DIR;
+                Toast.makeText(activity, path, Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -491,6 +497,7 @@ public class PacketAdapter extends BaseAdapter {
                         playAudio(play,i);
                         break;
                 }
+                clearCatches();
             }
 
             @Override
@@ -502,7 +509,7 @@ public class PacketAdapter extends BaseAdapter {
             @Override
             public void onCancelled() {}
         });
-        downloader.downloadFile("/storage/emulated/0",packetList.get(i).Slno+".mp3");
+        downloader.downloadFile(CACHE_DIR,packetList.get(i).Slno+".mp3");
     }
 
 
@@ -516,6 +523,7 @@ public class PacketAdapter extends BaseAdapter {
             {
                 if (isAudioCatched(packetList.get(i).Slno))
                 {
+                    play.setEnabled(false);
                     playAudio(play,i);
                 }
                 else
@@ -534,7 +542,7 @@ public class PacketAdapter extends BaseAdapter {
         mp=new MediaPlayer();
         try
         {
-            mp.setDataSource("/storage/emulated/0" + File.separator + packetList.get(i).Slno+".mp3");
+            mp.setDataSource(CACHE_DIR + packetList.get(i).Slno+".mp3");
             mp.prepare();
             mp.start();
             play.setImageDrawable(activity.getResources().getDrawable( R.drawable.playing ));
