@@ -1,7 +1,9 @@
 package amazinginsidestudios.audiolab;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -10,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -255,6 +258,36 @@ public class PacketAdapter extends BaseAdapter {
             @Override
             public void onClick(View view)
             {
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+                {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem)
+                    {
+                        switch (menuItem.getItemId())
+                        {
+                            case R.id.requestmovie:
+                                AlertDialog.Builder alert = new AlertDialog.Builder(activity);
+                                alert.setTitle("Enter Movie Name");
+                                alert.setMessage("Please enter the movie name that you would like to add to our collection");
+                                View v=View.inflate(context,R.layout.request_movie,null);
+                                final EditText input = (EditText)v.findViewById(R.id.movietitle);
+                                alert.setView(v);
+                                alert.setPositiveButton("Request Now", new DialogInterface.OnClickListener()
+                                {
+                                    public void onClick(DialogInterface dialog, int whichButton)
+                                    {
+                                        String value = input.getText().toString();
+                                        requestMovie(value);
+                                        Toast.makeText(activity, "Thankyou, Your request is under consideration", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                alert.show();
+                                return true;
+                            default:
+                                return true;
+                        }
+                    }
+                });
                 popup.show();
             }
         });
@@ -282,6 +315,12 @@ public class PacketAdapter extends BaseAdapter {
     {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         database.getReference("Reports/"+packetList.get(i).Name+"/WrongInfo").setValue(0);
+    }
+
+    private void requestMovie(String movie)
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        database.getReference("Requests/NewMovies/"+movie).setValue(0);
     }
 
 
