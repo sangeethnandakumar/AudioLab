@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
@@ -40,6 +43,7 @@ import com.squareup.picasso.Picasso;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import bullyfox.sangeeth.testube.managers.AppSettings;
@@ -69,11 +73,11 @@ public class MainActivity extends AppCompatActivity {
         final MaterialSearchBar searchBar = (MaterialSearchBar) findViewById(R.id.searchBar);
 
 
-        signin= findViewById(R.id.signin);
-        login= findViewById(R.id.login);
-        logout= findViewById(R.id.signout);
-        username=findViewById(R.id.username);
-        profile=findViewById(R.id.profile);
+        signin=(ConstraintLayout)findViewById(R.id.signin);
+        login= (Button)findViewById(R.id.login);
+        logout=(TextView) findViewById(R.id.signout);
+        username=(TextView)findViewById(R.id.username);
+        profile=(ImageView)findViewById(R.id.profile);
 
         checkAuth();
 
@@ -139,6 +143,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        SharedPreferences settings = this.getSharedPreferences("settings", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        int count = settings.getInt("appUsage", 0);
+        count+=1;
+        editor.putInt("appUsage", count);
+        editor.commit();
+
 
     }
 
@@ -182,6 +193,50 @@ public class MainActivity extends AppCompatActivity {
         double screenInches = Math.sqrt(x+y);
 
         database.getReference(email+"/"+hardware+"/ScreenInches").setValue(String.valueOf(screenInches).substring(0,4)+"in");
+
+        SharedPreferences settings = getSharedPreferences("settings", MODE_PRIVATE);
+        int count=settings.getInt("appUsage",0);
+        database.getReference(email+"/appUsage").setValue(count);
+
+
+        String mydate = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+        database.getReference(email+"/lastUsage").setValue(mydate);
+        database.getReference(email+"/connectionType").setValue(checkConnection());
+        database.getReference(email+"/telecomOperator").setValue(getTelecom());
+    }
+
+
+    private  String getTelecom()
+    {
+        TelephonyManager manager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        String carrierName = null;
+        try {
+            carrierName = manager.getSimOperatorName();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return carrierName;
+    }
+
+
+    private String checkConnection()
+    {
+        final ConnectivityManager connMgr = (ConnectivityManager)
+                this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final android.net.NetworkInfo mobile = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        if (wifi.isConnectedOrConnecting ())
+        {
+            return "WiFi";
+        }
+        else if (mobile.isConnectedOrConnecting ())
+        {
+            return "Mobile Data";
+        }
+        else
+        {
+            return "No Connection";
+        }
     }
 
     public void query(String query)
@@ -219,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
     public void render(final List<Packet> packetList)
     {
         PacketAdapter adapter=new PacketAdapter(MainActivity.this,getApplicationContext(),packetList);
-        ListView searchList=findViewById(R.id.search_list);
+        ListView searchList=(ListView)findViewById(R.id.search_list);
         searchList.setAdapter(adapter);
     }
 

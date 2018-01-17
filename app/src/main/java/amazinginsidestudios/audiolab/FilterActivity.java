@@ -31,10 +31,10 @@ public class FilterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
-        filterList = findViewById(R.id.filter_list);
-        filterImage = findViewById(R.id.filter_image);
-        filterName = findViewById(R.id.filter_name);
-        topsheet = findViewById(R.id.topsheet);
+        filterList = (ListView)findViewById(R.id.filter_list);
+        filterImage = (ImageView)findViewById(R.id.filter_image);
+        filterName = (TextView)findViewById(R.id.filter_name);
+        topsheet = (LinearLayout)findViewById(R.id.topsheet);
 
         Intent i = getIntent();
         Bundle b = i.getExtras();
@@ -115,7 +115,6 @@ public class FilterActivity extends AppCompatActivity {
             packetList=new ArrayList<>();
         }
         PacketAdapter adapter=new PacketAdapter(FilterActivity.this,getApplicationContext(),packetList);
-        filterList=(ListView)findViewById(R.id.filter_list);
         filterList.setAdapter(adapter);
     }
 

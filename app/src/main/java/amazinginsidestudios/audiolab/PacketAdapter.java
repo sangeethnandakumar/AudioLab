@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import bullyfox.sangeeth.testube.network.FileDownloader;
+import bullyfox.sangeeth.testube.network.WebServer;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 
 /**
@@ -64,13 +65,13 @@ public class PacketAdapter extends BaseAdapter {
         //Inflate Sound View
         View v=View.inflate(context,R.layout.sound,null);
         //Components
-        ImageView image=v.findViewById(R.id.sound_image);
-        TextView name=v.findViewById(R.id.sound_name_year);
-        TextView actor_movie=v.findViewById(R.id.sound_actor_movie);
-        TextView duration_size=v.findViewById(R.id.sound_duration_size);
-        ImageButton play=v.findViewById(R.id.sound_play);
-        ImageButton menu_popup=v.findViewById(R.id.sound_popup);
-        SmoothProgressBar progressBar=v.findViewById(R.id.progress);
+        ImageView image=(ImageView)v.findViewById(R.id.sound_image);
+        TextView name=(TextView)v.findViewById(R.id.sound_name_year);
+        TextView actor_movie=(TextView)v.findViewById(R.id.sound_actor_movie);
+        TextView duration_size=(TextView)v.findViewById(R.id.sound_duration_size);
+        ImageButton play=(ImageButton)v.findViewById(R.id.sound_play);
+        ImageButton menu_popup=(ImageButton)v.findViewById(R.id.sound_popup);
+        SmoothProgressBar progressBar=(SmoothProgressBar)v.findViewById(R.id.progress);
         //Fill Info
         name.setText(packetList.get(i).Name);
         actor_movie.setText(packetList.get(i).Actor+" | "+packetList.get(i).Movie);
@@ -92,9 +93,9 @@ public class PacketAdapter extends BaseAdapter {
         //Inflate Actor View
         View v=View.inflate(context,R.layout.actor,null);
         //Components
-        ImageView image=v.findViewById(R.id.actor_image);
-        TextView name=v.findViewById(R.id.actor_name);
-        ImageButton menu_popup=v.findViewById(R.id.actor_popup);
+        ImageView image=(ImageView)v.findViewById(R.id.actor_image);
+        TextView name=(TextView)v.findViewById(R.id.actor_name);
+        ImageButton menu_popup=(ImageButton)v.findViewById(R.id.actor_popup);
         //Fill Info
         name.setText(packetList.get(i).Name);
         //Identify Clicks
@@ -112,9 +113,9 @@ public class PacketAdapter extends BaseAdapter {
         //Inflate Movie View
         View v=View.inflate(context,R.layout.movie,null);
         //Components
-        ImageView image=v.findViewById(R.id.movie_image);
-        TextView name=v.findViewById(R.id.movie_name);
-        ImageButton menu_popup=v.findViewById(R.id.movie_popup);
+        ImageView image=(ImageView)v.findViewById(R.id.movie_image);
+        TextView name=(TextView)v.findViewById(R.id.movie_name);
+        ImageButton menu_popup=(ImageButton)v.findViewById(R.id.movie_popup);
         //Fill Info
         name.setText(packetList.get(i).Name+" ("+packetList.get(i).Year+")");
         //Identify Clicks
@@ -161,7 +162,7 @@ public class PacketAdapter extends BaseAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LinearLayout transit=view.findViewById(R.id.transit);
+                LinearLayout transit=(LinearLayout)view.findViewById(R.id.transit);
                 Intent intent = new Intent(activity, FilterActivity.class);
                 intent.putExtra("type", "Movie");
                 intent.putExtra("name", packetList.get(i).Name);
@@ -177,7 +178,7 @@ public class PacketAdapter extends BaseAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LinearLayout transit=view.findViewById(R.id.transit);
+                LinearLayout transit=(LinearLayout)view.findViewById(R.id.transit);
                 Intent intent = new Intent(activity, FilterActivity.class);
                 intent.putExtra("type", "Actor");
                 intent.putExtra("name", packetList.get(i).Name);
@@ -297,6 +298,29 @@ public class PacketAdapter extends BaseAdapter {
     }
 
 
+    //ANALITICS
+    private void reportDownload(final int i)
+    {
+        String urlStr = "http://amazinginside.esy.es/amazinginsidestudios/AudioLab/Scripts/sound_usage.php?q="+packetList.get(i).Name;
+        URI uri = null;
+        try
+        {
+            URL url = new URL(urlStr);
+            uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            url = uri.toURL();
+        }
+        catch (Exception e)
+        {}
+        WebServer server=new WebServer(context);
+        server.setOnServerStatusListner(new WebServer.OnServerStatusListner() {
+            @Override
+            public void onServerResponded(String s) {}
+            @Override
+            public void onServerRevoked() {}
+        });
+        server.connectWithGET(uri.toString());
+    }
+
 
 
     //RENDERS
@@ -314,7 +338,7 @@ public class PacketAdapter extends BaseAdapter {
 
 
     //DOWNLOAD ENGINE
-    private void downloadSound(int i,final SmoothProgressBar progressBar,final ImageButton play)
+    private void downloadSound(final int i,final SmoothProgressBar progressBar,final ImageButton play)
     {
         FileDownloader downloader=new FileDownloader(context,soundResolver(i));
         downloader.setOnDownloadStatusListner(new FileDownloader.OnDownloadStatusListner()
@@ -345,6 +369,7 @@ public class PacketAdapter extends BaseAdapter {
 
             @Override
             public void onCompleted() {
+                reportDownload(i);
                 progressBar.setVisibility(View.GONE);
                 playAudio(play);
             }
