@@ -40,7 +40,7 @@ public class PacketAdapter extends BaseAdapter {
     Context context;
     List<Packet> packetList;
     MediaPlayer mp;
-    enum type
+    DownloadMode mode;
 
 
     public PacketAdapter(Activity activity, Context context, List<Packet> packetList)
@@ -313,12 +313,14 @@ public class PacketAdapter extends BaseAdapter {
     {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         database.getReference("Reports/"+packetList.get(i).Name+"/PoorQuality").setValue(0);
+        Toast.makeText(activity, "Thankyou for your will. We will try to improve its quality or try to find another source", Toast.LENGTH_LONG).show();
     }
 
     private void wrongInfoReporter(final int i)
     {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         database.getReference("Reports/"+packetList.get(i).Name+"/WrongInfo").setValue(0);
+        Toast.makeText(activity, "Thankyou for your suggestions..We will review the audio informations", Toast.LENGTH_LONG).show();
     }
 
     private void requestMovie(String movie)
@@ -425,36 +427,55 @@ public class PacketAdapter extends BaseAdapter {
 
 
     //DOWNLOAD ENGINE
-    private void downloadSound(final int i,final SmoothProgressBar progressBar,final ImageButton play)
+    private void downloadSound(final int i, final SmoothProgressBar progressBar, final ImageButton play, final DownloadMode downloadMode)
     {
         FileDownloader downloader=new FileDownloader(context,soundResolver(i));
         downloader.setOnDownloadStatusListner(new FileDownloader.OnDownloadStatusListner()
         {
             @Override
-            public void onStarted() {
+            public void onStarted()
+            {
                 fileCatcheWiper();
                 progressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
-            public void onConnecting() {
-                play.setImageDrawable(activity.getResources().getDrawable( R.drawable.downloading));
-                progressBar.setSmoothProgressDrawableSpeed(10);
+            public void onConnecting()
+            {
+                switch (downloadMode)
+                {
+                    case TO_PLAY:
+                        play.setImageDrawable(activity.getResources().getDrawable( R.drawable.downloading));
+                        progressBar.setSmoothProgressDrawableSpeed(10);
+                        break;
+                }
             }
 
             @Override
             public void onConnected(long l, boolean b) {}
 
             @Override
-            public void onDownloading(long l, long l1, int i) {
-                progressBar.setSmoothProgressDrawableSpeed(15);
+            public void onDownloading(long l, long l1, int i)
+            {
+                switch (downloadMode)
+                {
+                    case TO_PLAY:
+                        progressBar.setSmoothProgressDrawableSpeed(15);
+                        break;
+                }
             }
 
             @Override
-            public void onCompleted() {
+            public void onCompleted()
+            {
                 reportDownload(i);
-                progressBar.setVisibility(View.GONE);
-                playAudio(play);
+                switch (downloadMode)
+                {
+                    case TO_PLAY:
+                        progressBar.setVisibility(View.GONE);
+                        playAudio(play);
+                        break;
+                }
             }
 
             @Override
@@ -478,10 +499,8 @@ public class PacketAdapter extends BaseAdapter {
             @Override
             public void onClick(View view)
             {
-                //Prevent Further clicks
                 play.setEnabled(false);
-                //Download & Play
-                downloadSound(i,progressBar,play);
+                downloadSound(i,progressBar,play,DownloadMode.TO_PLAY);
             }
         });
     }
@@ -492,10 +511,13 @@ public class PacketAdapter extends BaseAdapter {
     {
         try
         {
+            mp.release();
+            mp.reset();
             mp.setDataSource("/storage/emulated/0" + File.separator + "temp.mp3");
             mp.prepare();
-            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-            {
+            mp.start();
+            play.setImageDrawable(activity.getResources().getDrawable( R.drawable.playing ));
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer)
                 {
@@ -503,9 +525,8 @@ public class PacketAdapter extends BaseAdapter {
                     play.setEnabled(true);
                 }
             });
-            mp.start();
-            play.setImageDrawable(activity.getResources().getDrawable( R.drawable.playing ));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
