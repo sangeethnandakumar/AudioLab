@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
 import android.view.MenuItem;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -53,7 +55,7 @@ public class PacketAdapter extends BaseAdapter {
         this.context = context;
         this.packetList = packetList;
         c = new ContextWrapper(activity);
-        CACHE_DIR=c.getFilesDir().getPath()+"/cache/";
+        CACHE_DIR= Environment.getExternalStorageDirectory().getAbsolutePath()+"/cache/";
     }
 
     @Override
@@ -91,7 +93,7 @@ public class PacketAdapter extends BaseAdapter {
         actor_movie.setText(packetList.get(i).Actor+" | "+packetList.get(i).Movie);
         duration_size.setText(packetList.get(i).Duration+"Sec | "+packetList.get(i).Filesize+"KB");
         //Identify Swipes
-        identifySoundSwipes(v);
+        identifySoundSwipes(i,v,progressBar,play);
         //Identify MenuClicks
         inflateSoundMenu(i,menu_popup);
         //Render Poster
@@ -144,7 +146,7 @@ public class PacketAdapter extends BaseAdapter {
 
 
     //SWIPE MACHINES
-    private void identifySoundSwipes(View view)
+    private void identifySoundSwipes(final int i,View view,final SmoothProgressBar progressBar, final ImageButton play)
     {
         view.setOnTouchListener(new QuickShare(activity)
         {
@@ -155,7 +157,7 @@ public class PacketAdapter extends BaseAdapter {
 
             public void onSwipeRight()
             {
-                quickShare("com.whatsapp");
+                quickShare(i,"com.whatsapp",progressBar,play);
             }
 
             public void onSwipeLeft() {
@@ -225,13 +227,16 @@ public class PacketAdapter extends BaseAdapter {
                         switch (menuItem.getItemId())
                         {
                             case R.id.sendto:
-                                openShareDIalogue();
+                                openShareDialogue();
                                 return true;
                             case R.id.reportpoor:
                                 poorQualityReporter(i);
                                 return true;
                             case R.id.reportwrong:
                                 wrongInfoReporter(i);
+                                return true;
+                            case R.id.clearcache:
+                                clearCatches();
                                 return true;
                             default:
                                 return true;
@@ -302,7 +307,7 @@ public class PacketAdapter extends BaseAdapter {
         });
     }
 
-    private void openShareDIalogue()
+    private void openShareDialogue()
     {
         File file = new File("/storage/emulated/0/temp.mp3");
         Uri uri = Uri.fromFile(file);
@@ -421,6 +426,21 @@ public class PacketAdapter extends BaseAdapter {
 
 
 
+    //CACHE MANAGEMENT
+    private void clearCatches()
+    {
+        File dir = new File(CACHE_DIR);
+        if (dir.isDirectory())
+        {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++)
+            {
+                new File(dir, children[i]).delete();
+            }
+        }
+        Toast.makeText(activity, "Catche cleared successfully", Toast.LENGTH_LONG).show();
+    }
+
     private boolean isAudioCatched(String Slno)
     {
         File file = new File(CACHE_DIR+ Slno+".mp3");
@@ -432,18 +452,6 @@ public class PacketAdapter extends BaseAdapter {
         }
     }
 
-    private void clearCatches()
-    {
-        String path = CACHE_DIR;
-        Log.i("Files", "Path: " + path);
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-        Log.i("Files", "Size: "+ files.length);
-        for (int i = 0; i < files.length; i++)
-        {
-            Log.i("Files", "FileName:" + files[i].getName());
-        }
-    }
 
 
     //DOWNLOAD ENGINE
@@ -456,8 +464,6 @@ public class PacketAdapter extends BaseAdapter {
             public void onStarted()
             {
                 progressBar.setVisibility(View.VISIBLE);
-                String path=CACHE_DIR;
-                Toast.makeText(activity, path, Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -467,6 +473,10 @@ public class PacketAdapter extends BaseAdapter {
                 {
                     case TO_PLAY:
                         play.setImageDrawable(activity.getResources().getDrawable( R.drawable.downloading));
+                        progressBar.setSmoothProgressDrawableSpeed(10);
+                        break;
+                    case TO_SHARE:
+                        play.setImageDrawable(activity.getResources().getDrawable( R.drawable.share));
                         progressBar.setSmoothProgressDrawableSpeed(10);
                         break;
                 }
@@ -483,6 +493,9 @@ public class PacketAdapter extends BaseAdapter {
                     case TO_PLAY:
                         progressBar.setSmoothProgressDrawableSpeed(15);
                         break;
+                    case TO_SHARE:
+                        progressBar.setSmoothProgressDrawableSpeed(15);
+                        break;
                 }
             }
 
@@ -496,8 +509,13 @@ public class PacketAdapter extends BaseAdapter {
                         progressBar.setVisibility(View.GONE);
                         playAudio(play,i);
                         break;
+                    case TO_SHARE:
+                        quickShare(i,"com.whatsapp",progressBar,play);
+                        progressBar.setVisibility(View.GONE);
+                        play.setImageDrawable(activity.getResources().getDrawable( R.drawable.play));
+                        play.setEnabled(true);
+                        break;
                 }
-                clearCatches();
             }
 
             @Override
@@ -511,6 +529,7 @@ public class PacketAdapter extends BaseAdapter {
         });
         downloader.downloadFile(CACHE_DIR,packetList.get(i).Slno+".mp3");
     }
+
 
 
     //CONTENT CLICKS
@@ -580,15 +599,24 @@ public class PacketAdapter extends BaseAdapter {
     }
 
 
-    public void quickShare(String package_name)
+    //EXTENDED FUNCTIONS
+    public void quickShare(int i,String package_name,final SmoothProgressBar progressBar,final ImageButton play)
     {
-        File file = new File("/storage/emulated/0/temp.mp3");
-        Uri uri = Uri.fromFile(file);
-        Intent share = new Intent(Intent.ACTION_SEND);
-        share.setType("audio/mp3");
-        share.setPackage(package_name);
-        share.putExtra(Intent.EXTRA_STREAM, uri);
-        activity.startActivity(share);
+        File file = new File(CACHE_DIR+packetList.get(i).Slno+".mp3");
+        if (file.exists())
+        {
+            Uri uri = Uri.fromFile(file);
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("audio/mp3");
+            share.setPackage(package_name);
+            share.putExtra(Intent.EXTRA_STREAM, uri);
+            activity.startActivity(share);
+        }
+        else
+        {
+            downloadSound(i,progressBar,play,DownloadMode.TO_SHARE);
+        }
+
     }
 
 }

@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -65,13 +66,13 @@ public class MainActivity extends AppCompatActivity {
     ImageView profile;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ContextWrapper c = new ContextWrapper(this);
-        String DATA_DIR=c.getFilesDir().getPath();
+        String DATA_DIR= Environment.getExternalStorageDirectory().getAbsolutePath();
 
         //Create Directory if not exits
         String dirPath = DATA_DIR + "/" + "cache";

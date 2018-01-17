@@ -11,5 +11,9 @@
         android:id="@+id/reportwrong"
         android:title="Report Wrong Info" />
 
+    <item
+        android:id="@+id/clearcache"
+        android:title="Clear Cache" />
+
 
 </menu>
