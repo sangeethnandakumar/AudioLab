@@ -1,4 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
 
+    <item
+        android:id="@+id/requestmovie"
+        android:title="Request New Movie" />
 </menu>

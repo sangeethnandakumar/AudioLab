@@ -2,6 +2,14 @@
 
     <item
         android:id="@+id/sendto"
-        android:title="Send To"/>
+        android:title="Send To" />
+    <item
+        android:id="@+id/reportpoor"
+        android:title="Report Poor Quality" />
+
+    <item
+        android:id="@+id/reportwrong"
+        android:title="Report Wrong Info" />
+
 
 </menu>

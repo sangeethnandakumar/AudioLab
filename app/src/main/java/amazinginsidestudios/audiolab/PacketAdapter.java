@@ -16,6 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.net.URI;
@@ -79,7 +81,7 @@ public class PacketAdapter extends BaseAdapter {
         //Identify Swipes
         identifySoundSwipes(v);
         //Identify MenuClicks
-        inflateSoundMenu(menu_popup);
+        inflateSoundMenu(i,menu_popup);
         //Render Poster
         renderActorPoster(image,actorImageResolver(i));
         //Handle PLayButton clicks
@@ -194,7 +196,7 @@ public class PacketAdapter extends BaseAdapter {
 
 
     //MENU MACHINES
-    private void inflateSoundMenu(ImageButton menu_popup)
+    private void inflateSoundMenu(final int i,ImageButton menu_popup)
     {
         final PopupMenu popup = new PopupMenu(context, menu_popup);
         popup.getMenuInflater().inflate(R.menu.menu_sound_popup, popup.getMenu());
@@ -208,19 +210,27 @@ public class PacketAdapter extends BaseAdapter {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem)
                     {
-                        File file = new File("/storage/emulated/0/temp.mp3");
-                        Uri uri = Uri.fromFile(file);
-                        Intent share = new Intent(Intent.ACTION_SEND);
-                        share.setType("audio/mp3");
-                        share.putExtra(Intent.EXTRA_STREAM, uri);
-                        activity.startActivity(Intent.createChooser(share, "Share Audio File"));
-                        return false;
+                        switch (menuItem.getItemId())
+                        {
+                            case R.id.sendto:
+                                openShareDIalogue();
+                                return true;
+                            case R.id.reportpoor:
+                                poorQualityReporter(i);
+                                return true;
+                            case R.id.reportwrong:
+                                wrongInfoReporter(i);
+                                return true;
+                            default:
+                                return true;
+                        }
                     }
                 });
                 popup.show();
             }
         });
     }
+
 
     private void inflateActorMenu(ImageButton menu_popup)
     {
@@ -249,6 +259,31 @@ public class PacketAdapter extends BaseAdapter {
             }
         });
     }
+
+    private void openShareDIalogue()
+    {
+        File file = new File("/storage/emulated/0/temp.mp3");
+        Uri uri = Uri.fromFile(file);
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("audio/mp3");
+        share.putExtra(Intent.EXTRA_STREAM, uri);
+        activity.startActivity(Intent.createChooser(share, "Share Audio File"));
+    }
+
+
+    //REPORTERS
+    private void poorQualityReporter(final int i)
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        database.getReference("Reports/"+packetList.get(i).Name+"/PoorQuality").setValue(0);
+    }
+
+    private void wrongInfoReporter(final int i)
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        database.getReference("Reports/"+packetList.get(i).Name+"/WrongInfo").setValue(0);
+    }
+
 
 
     //URL RESOLVERS
