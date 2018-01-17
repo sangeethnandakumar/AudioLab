@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
@@ -14,6 +16,7 @@ import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -36,7 +39,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mancj.materialsearchbar.MaterialSearchBar;
@@ -64,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     Button login;
     TextView username,logout;
     ImageView profile;
+    SwipeRefreshLayout swipe;
 
 
 
@@ -79,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
         File projDir = new File(dirPath);
         if (!projDir.exists()) projDir.mkdirs();
 
+        checkUpdates();
+
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         final MaterialSearchBar searchBar = (MaterialSearchBar) findViewById(R.id.searchBar);
@@ -89,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         logout=(TextView) findViewById(R.id.signout);
         username=(TextView)findViewById(R.id.username);
         profile=(ImageView)findViewById(R.id.profile);
+        swipe=(SwipeRefreshLayout)findViewById(R.id.swiperefresh);
 
         checkAuth();
 
@@ -124,6 +135,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         permit.askPermitsFor(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE);
+
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                query("");
+            }
+        });
 
         searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
@@ -164,6 +182,33 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    private void checkUpdates()
+    {
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference("M_latestVersion");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                try {
+                    PackageManager manager = getApplicationContext().getPackageManager();
+                    PackageInfo info = manager.getPackageInfo(getApplicationContext().getPackageName(), 0);
+                    int currentVersion = info.versionCode;
+                    int newVersion=Integer.parseInt(dataSnapshot.getValue().toString());
+                    if (currentVersion<newVersion)
+                    {
+
+                    }
+                }
+                catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+    }
 
 
     private void registerUser(FirebaseUser user)
@@ -257,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onServerResponded(String s) {
                 deserialise(s);
+                swipe.setRefreshing(false);
             }
 
             @Override
