@@ -95,7 +95,7 @@ public class PacketAdapter extends BaseAdapter {
         //Identify Swipes
         identifySoundSwipes(i,v,progressBar,play);
         //Identify MenuClicks
-        inflateSoundMenu(i,menu_popup);
+        inflateSoundMenu(i,menu_popup,progressBar,play);
         //Render Poster
         renderActorPoster(image,actorImageResolver(i));
         //Handle PLayButton clicks
@@ -210,7 +210,7 @@ public class PacketAdapter extends BaseAdapter {
 
 
     //MENU MACHINES
-    private void inflateSoundMenu(final int i,ImageButton menu_popup)
+    private void inflateSoundMenu(final int i,ImageButton menu_popup,final SmoothProgressBar progressBar, final ImageButton play)
     {
         final PopupMenu popup = new PopupMenu(context, menu_popup);
         popup.getMenuInflater().inflate(R.menu.menu_sound_popup, popup.getMenu());
@@ -226,6 +226,9 @@ public class PacketAdapter extends BaseAdapter {
                     {
                         switch (menuItem.getItemId())
                         {
+                            case R.id.directwhatsapp:
+                                quickShare(i,"com.whatsapp",progressBar,play);
+                                return true;
                             case R.id.sendto:
                                 openShareDialogue();
                                 return true;

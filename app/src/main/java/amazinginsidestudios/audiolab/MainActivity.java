@@ -63,13 +63,12 @@ import bullyfox.sangeeth.testube.permission.Permit;
 public class MainActivity extends AppCompatActivity {
     private FirebaseAnalytics mFirebaseAnalytics;
     private FirebaseUser mFirebaseUser;
-    String mPhotoUrl;
     String mUsername;
-    ConstraintLayout signin;
+    ConstraintLayout signin,updatesheet;
     private FirebaseAuth mAuth;
     private static final int RC_SIGN_IN = 123;
     Button login;
-    TextView username,logout;
+    TextView username,logout,updatemsg;
     ImageView profile;
     SwipeRefreshLayout swipe;
 
@@ -95,8 +94,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         signin=(ConstraintLayout)findViewById(R.id.signin);
+        updatesheet=(ConstraintLayout)findViewById(R.id.updatesheet);
         login= (Button)findViewById(R.id.login);
         logout=(TextView) findViewById(R.id.signout);
+        updatemsg=(TextView) findViewById(R.id.updatemsg);
         username=(TextView)findViewById(R.id.username);
         profile=(ImageView)findViewById(R.id.profile);
         swipe=(SwipeRefreshLayout)findViewById(R.id.swiperefresh);
@@ -183,21 +184,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void openPlayStore()
+    {
+        final String appPackageName = getPackageName();
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+        }
+    }
+
     private void checkUpdates()
     {
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference("M_latestVersion");
-        ref.addValueEventListener(new ValueEventListener() {
+        ref.addValueEventListener(new ValueEventListener()
+        {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                try {
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                try
+                {
                     PackageManager manager = getApplicationContext().getPackageManager();
                     PackageInfo info = manager.getPackageInfo(getApplicationContext().getPackageName(), 0);
                     int currentVersion = info.versionCode;
                     int newVersion=Integer.parseInt(dataSnapshot.getValue().toString());
                     if (currentVersion<newVersion)
                     {
+                        updatesheet.setVisibility(View.VISIBLE);
+                        Button update=(Button)findViewById(R.id.updatenow);
+                        update.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                openPlayStore();
+                            }
+                        });
+                        update.setVisibility(View.VISIBLE);
+                        DatabaseReference ref = database.getReference("M_updateMsg");
+                        ref.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                updatemsg.setText(dataSnapshot.getValue().toString());
+                            }
 
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {}
+                        });
                     }
                 }
                 catch (PackageManager.NameNotFoundException e) {

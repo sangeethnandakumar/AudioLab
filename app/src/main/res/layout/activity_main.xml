@@ -34,6 +34,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView">
 
+
         <ListView
             android:id="@+id/search_list"
             android:layout_width="match_parent"
@@ -44,8 +45,8 @@
             android:divider="@android:color/transparent"
             android:dividerHeight="0dp"
              />
-    </android.support.v4.widget.SwipeRefreshLayout>
 
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 
     <android.support.constraint.ConstraintLayout
@@ -53,11 +54,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="#c4000000"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
 
         <ImageView
             android:id="@+id/imageView2"
@@ -184,5 +186,62 @@
         app:mt_placeholder="AudioLAB"
         app:mt_navIconEnabled="true"
         app:mt_borderlessRippleEnabled="true" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/updatesheet"
+        android:layout_width="0dp"
+        android:layout_height="95dp"
+        android:background="#af000000"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/updatenow"
+            android:layout_width="120dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="#ff9800"
+            android:text="Update Now"
+            android:textColor="#fff"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/updatemsg" />
+
+        <TextView
+            android:id="@+id/updatemsg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:text="Hey..New Update Available"
+            android:textAlignment="center"
+            android:textColor="#a4ffffff"
+            android:textSize="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText3" />
+
+        <TextView
+            android:id="@+id/editText3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="NEW UPDATE AVAILABLE"
+            android:textAlignment="center"
+            android:textColor="#fff"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>
