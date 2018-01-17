@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
@@ -38,6 +39,8 @@ public class PacketAdapter extends BaseAdapter {
     Activity activity;
     Context context;
     List<Packet> packetList;
+    MediaPlayer mp;
+    enum type
 
 
     public PacketAdapter(Activity activity, Context context, List<Packet> packetList)
@@ -45,6 +48,7 @@ public class PacketAdapter extends BaseAdapter {
         this.activity = activity;
         this.context = context;
         this.packetList = packetList;
+        mp = new MediaPlayer();
     }
 
     @Override
@@ -410,6 +414,15 @@ public class PacketAdapter extends BaseAdapter {
 
 
 
+    private void fileCatcheWiper()
+    {
+        File file = new File("/storage/emulated/0" + File.separator + "temp.mp3");
+        if (file.exists())
+        {
+            file.delete();
+        }
+    }
+
 
     //DOWNLOAD ENGINE
     private void downloadSound(final int i,final SmoothProgressBar progressBar,final ImageButton play)
@@ -419,12 +432,8 @@ public class PacketAdapter extends BaseAdapter {
         {
             @Override
             public void onStarted() {
+                fileCatcheWiper();
                 progressBar.setVisibility(View.VISIBLE);
-                File file = new File("/storage/emulated/0" + File.separator + "temp.mp3");
-                if (file.exists())
-                {
-                    file.delete();
-                }
             }
 
             @Override
@@ -469,6 +478,8 @@ public class PacketAdapter extends BaseAdapter {
             @Override
             public void onClick(View view)
             {
+                //Prevent Further clicks
+                play.setEnabled(false);
                 //Download & Play
                 downloadSound(i,progressBar,play);
             }
@@ -479,23 +490,24 @@ public class PacketAdapter extends BaseAdapter {
     //AUDIO PLAYER
     private void playAudio(final ImageButton play)
     {
-        MediaPlayer mp = new MediaPlayer();
-        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer)
-            {
-                play.setImageDrawable(activity.getResources().getDrawable( R.drawable.play));
-            }
-        });
         try
         {
             mp.setDataSource("/storage/emulated/0" + File.separator + "temp.mp3");
             mp.prepare();
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+            {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer)
+                {
+                    play.setImageDrawable(activity.getResources().getDrawable( R.drawable.play));
+                    play.setEnabled(true);
+                }
+            });
             mp.start();
             play.setImageDrawable(activity.getResources().getDrawable( R.drawable.playing ));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        catch (Exception e)
-        {}
     }
 
 

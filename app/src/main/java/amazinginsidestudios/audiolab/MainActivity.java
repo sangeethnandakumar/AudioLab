@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onServerRevoked() {
-                Toast.makeText(MainActivity.this, "Can't connect to server", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Unable to connect to server", Toast.LENGTH_SHORT).show();
             }
         });
         String uri = Uri.parse("http://amazinginside.esy.es/amazinginsidestudios/AudioLab/Scripts/query.php")
