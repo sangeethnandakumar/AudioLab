@@ -9,7 +9,7 @@ public class Packet {
     }
 
 
-    public int Slno;
+    public String Slno;
     public String Name;
     public String Actor;
     public String Movie;

@@ -7,7 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +50,6 @@ public class PacketAdapter extends BaseAdapter {
         this.activity = activity;
         this.context = context;
         this.packetList = packetList;
-        mp = new MediaPlayer();
     }
 
     @Override
@@ -416,12 +417,27 @@ public class PacketAdapter extends BaseAdapter {
 
 
 
-    private void fileCatcheWiper()
+    private boolean isAudioCatched(String Slno)
     {
-        File file = new File("/storage/emulated/0" + File.separator + "temp.mp3");
-        if (file.exists())
+        File file = new File("/storage/emulated/0" + File.separator + Slno+".mp3");
+        if(file.exists()) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private void clearCatches()
+    {
+        String path = Environment.getExternalStorageDirectory().toString()+"/Pictures";
+        Log.d("Files", "Path: " + path);
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
         {
-            file.delete();
+            Log.d("Files", "FileName:" + files[i].getName());
         }
     }
 
@@ -435,7 +451,6 @@ public class PacketAdapter extends BaseAdapter {
             @Override
             public void onStarted()
             {
-                fileCatcheWiper();
                 progressBar.setVisibility(View.VISIBLE);
             }
 
@@ -473,7 +488,7 @@ public class PacketAdapter extends BaseAdapter {
                 {
                     case TO_PLAY:
                         progressBar.setVisibility(View.GONE);
-                        playAudio(play);
+                        playAudio(play,i);
                         break;
                 }
             }
@@ -487,7 +502,7 @@ public class PacketAdapter extends BaseAdapter {
             @Override
             public void onCancelled() {}
         });
-        downloader.downloadFile("/storage/emulated/0","temp.mp3");
+        downloader.downloadFile("/storage/emulated/0",packetList.get(i).Slno+".mp3");
     }
 
 
@@ -499,21 +514,27 @@ public class PacketAdapter extends BaseAdapter {
             @Override
             public void onClick(View view)
             {
-                play.setEnabled(false);
-                downloadSound(i,progressBar,play,DownloadMode.TO_PLAY);
+                if (isAudioCatched(packetList.get(i).Slno))
+                {
+                    playAudio(play,i);
+                }
+                else
+                {
+                    play.setEnabled(false);
+                    downloadSound(i,progressBar,play,DownloadMode.TO_PLAY);
+                }
             }
         });
     }
 
 
     //AUDIO PLAYER
-    private void playAudio(final ImageButton play)
+    private void playAudio(final ImageButton play,final int i)
     {
+        mp=new MediaPlayer();
         try
         {
-            mp.release();
-            mp.reset();
-            mp.setDataSource("/storage/emulated/0" + File.separator + "temp.mp3");
+            mp.setDataSource("/storage/emulated/0" + File.separator + packetList.get(i).Slno+".mp3");
             mp.prepare();
             mp.start();
             play.setImageDrawable(activity.getResources().getDrawable( R.drawable.playing ));
@@ -523,6 +544,8 @@ public class PacketAdapter extends BaseAdapter {
                 {
                     play.setImageDrawable(activity.getResources().getDrawable( R.drawable.play));
                     play.setEnabled(true);
+                    mp=null;
+                    System.gc();
                 }
             });
         }
